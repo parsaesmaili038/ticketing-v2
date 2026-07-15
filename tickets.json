@@ -1,0 +1,15 @@
+[
+    {
+        "id": 1,
+        "title": "maded by parsa .",
+        "description": "",
+        "status": "open",
+        "priority": "medium",
+        "reporter": "-",
+        "assignee": "-",
+        "tags": [],
+        "created_at": "2026-06-04T10:59:49.310391+00:00",
+        "updated_at": "2026-06-04T11:13:53.034362+00:00",
+        "notes": []
+    }
+]
