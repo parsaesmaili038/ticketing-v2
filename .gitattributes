@@ -1,0 +1,7 @@
+ # Set default behavior for all files
+* text=auto eol=crlf
+
+# Explicitly set for Python files
+*.py text eol=crlf
+*.txt text eol=crlf
+*.md text eol=crlf
