@@ -7,6 +7,39 @@ The application provides a simple graphical interface for creating, viewing, edi
 Ticket data is stored locally in a JSON file, so no external database or server is required.
 
 ---
+## ⚠️ IMPORTANT NOTES
+
+**IMPORTANT: This application is a LIGHTWEIGHT LOCAL TICKET MANAGER and is NOT designed to operate as a MULTI-USER, NETWORK-BASED, or SERVER-BASED TICKETING PLATFORM.**
+
+The application is intended for **LOCAL, SINGLE-USER USE**. It does not provide the **SECURITY, ACCESS CONTROL, SYNCHRONIZATION, CONCURRENCY HANDLING,** or **INFRASTRUCTURE** normally required for a **MULTI-USER** or **PRODUCTION SERVER ENVIRONMENT**.
+
+**DO NOT DEPLOY OR USE THIS APPLICATION AS A SHARED SERVER-BASED TICKETING SYSTEM** unless you have independently implemented and verified the required **SECURITY, AUTHENTICATION, AUTHORIZATION, SYNCHRONIZATION, BACKUP,** and **DATA-PROTECTION MECHANISMS**.
+
+The current application does **NOT** provide:
+
+- **AUTHENTICATION**
+- **USER ACCOUNTS**
+- **ROLE-BASED PERMISSIONS OR ACCESS CONTROL**
+- **NETWORK SYNCHRONIZATION**
+- **MULTI-USER CONCURRENCY CONTROL**
+- **DATABASE-BACKED STORAGE**
+- **CLOUD SYNCHRONIZATION**
+- **AUTOMATIC BACKUPS**
+- **AUDIT LOGGING**
+- **ENCRYPTION OF STORED TICKET DATA**
+- **SERVER-SIDE ACCESS CONTROL**
+- **PROTECTION AGAINST SIMULTANEOUS MODIFICATION OF THE JSON DATA FILE**
+- **BUILT-IN RECOVERY MECHANISMS FOR DATA LOSS OR CORRUPTION**
+
+Ticket data is stored locally in a JSON file named `tickets_gui.json`.
+
+**THE JSON FILE IS NOT ENCRYPTED BY THE APPLICATION** and may contain **TICKET INFORMATION, NOTES, USER NAMES,** or other potentially **SENSITIVE DATA**. You are solely responsible for **PROTECTING THE FILE** and **RESTRICTING ACCESS TO IT**.
+
+**DO NOT STORE SENSITIVE, CONFIDENTIAL, REGULATED, OR SECURITY-CRITICAL INFORMATION IN THE APPLICATION** unless you have independently implemented appropriate **PROTECTION MECHANISMS**.
+
+Using the application in an environment for which it was not designed is entirely at the user's **OWN RISK AND RESPONSIBILITY**, to the maximum extent permitted by applicable law.
+
+---
 
 ## Features
 
@@ -338,39 +371,6 @@ If the JSON data file does not exist, an empty ticket list is used.
 If the JSON file is invalid or cannot be read, the application starts with an empty ticket list instead of terminating immediately.
 
 Save failures are reported as runtime errors.
-
----
-## ⚠️ IMPORTANT NOTES
-
-**IMPORTANT: This application is a LIGHTWEIGHT LOCAL TICKET MANAGER and is NOT designed to operate as a MULTI-USER, NETWORK-BASED, or SERVER-BASED TICKETING PLATFORM.**
-
-The application is intended for **LOCAL, SINGLE-USER USE**. It does not provide the **SECURITY, ACCESS CONTROL, SYNCHRONIZATION, CONCURRENCY HANDLING,** or **INFRASTRUCTURE** normally required for a **MULTI-USER** or **PRODUCTION SERVER ENVIRONMENT**.
-
-**DO NOT DEPLOY OR USE THIS APPLICATION AS A SHARED SERVER-BASED TICKETING SYSTEM** unless you have independently implemented and verified the required **SECURITY, AUTHENTICATION, AUTHORIZATION, SYNCHRONIZATION, BACKUP,** and **DATA-PROTECTION MECHANISMS**.
-
-The current application does **NOT** provide:
-
-- **AUTHENTICATION**
-- **USER ACCOUNTS**
-- **ROLE-BASED PERMISSIONS OR ACCESS CONTROL**
-- **NETWORK SYNCHRONIZATION**
-- **MULTI-USER CONCURRENCY CONTROL**
-- **DATABASE-BACKED STORAGE**
-- **CLOUD SYNCHRONIZATION**
-- **AUTOMATIC BACKUPS**
-- **AUDIT LOGGING**
-- **ENCRYPTION OF STORED TICKET DATA**
-- **SERVER-SIDE ACCESS CONTROL**
-- **PROTECTION AGAINST SIMULTANEOUS MODIFICATION OF THE JSON DATA FILE**
-- **BUILT-IN RECOVERY MECHANISMS FOR DATA LOSS OR CORRUPTION**
-
-Ticket data is stored locally in a JSON file named `tickets_gui.json`.
-
-**THE JSON FILE IS NOT ENCRYPTED BY THE APPLICATION** and may contain **TICKET INFORMATION, NOTES, USER NAMES,** or other potentially **SENSITIVE DATA**. You are solely responsible for **PROTECTING THE FILE** and **RESTRICTING ACCESS TO IT**.
-
-**DO NOT STORE SENSITIVE, CONFIDENTIAL, REGULATED, OR SECURITY-CRITICAL INFORMATION IN THE APPLICATION** unless you have independently implemented appropriate **PROTECTION MECHANISMS**.
-
-Using the application in an environment for which it was not designed is entirely at the user's **OWN RISK AND RESPONSIBILITY**, to the maximum extent permitted by applicable law.
 
 ---
 
