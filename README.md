@@ -338,9 +338,14 @@ The `venv/` directory contains the project's Python virtual environment and is n
 
 The application is divided into three main parts.
 
+---
+
 ### Data Model
 
 The `Ticket` dataclass represents individual tickets and handles conversion between Python objects and JSON-compatible dictionaries.
+
+---
+
 
 ### Ticket Management
 
@@ -354,6 +359,8 @@ The `TicketSystem` class handles:
 * Deleting tickets
 * Adding notes
 * Searching tickets
+
+---
 
 ### Graphical Interface
 
