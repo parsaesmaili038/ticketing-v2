@@ -84,7 +84,7 @@ Each ticket can contain the following information:
 | Tags        | Comma-separated tags               |
 | Notes       | Additional notes with timestamps   |
 | Created At  | Ticket creation time in UTC        |
-| Updated At  | Last update time in UTC            |
+| Updated At  | Last update time in UTC            ||
 
 ---
 
