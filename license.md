@@ -95,13 +95,13 @@ Attribution must not falsely imply that the Copyright Holder created, maintains,
 
 ## 7. Modified Versions
 
-Anyone distributing a Modified Version must clearly indicate that the Software has been modified.
+Anyone distributing a Modified Version must clearly and reasonably visibly indicate that the Software has been modified.
 
 Where reasonably practical, the distributor should identify the general nature of the modifications and the person or organization responsible for them.
 
 A Modified Version must not be falsely represented as an unmodified or official release of the original Software.
 
-Such indication must be reasonably visible and must not be presented in a manner that suggests the Modified Version is an official release.
+The indication of modification must not be presented in a manner that suggests endorsement, approval, certification, or official status by the Copyright Holder.
 
 No person or organization may falsely state or imply that the Copyright Holder reviewed, approved, certified, endorsed, maintains, or supports a Modified Version unless the Copyright Holder has expressly agreed to such representation.
 
@@ -242,11 +242,15 @@ Any representation of endorsement, sponsorship, certification, partnership, or o
 
 ## 17. User Responsibility
 
-You are responsible for determining whether Your use of the Software complies with applicable laws, regulations, contractual obligations, third-party licenses, security requirements, privacy requirements, export or import restrictions, and other requirements applicable to Your use.
+You are solely responsible for determining whether Your use of the Software is lawful, appropriate, safe, secure, and suitable for Your intended purpose and environment.
 
-You are also responsible for obtaining all permissions, approvals, licenses, authorizations, and consents required for Your particular use of the Software.
+You are solely responsible for the manner, environment, and purpose in which You use, deploy, modify, or distribute the Software.
 
-The Copyright Holder is not responsible for determining whether Your particular use is lawful, appropriate, safe, secure, or compliant with requirements applicable to You.
+Any use of the Software that is unlawful, unauthorized, inappropriate, unsafe, or unsuitable for Your intended environment is undertaken at Your own risk and responsibility.
+
+You are responsible for obtaining all permissions, approvals, licenses, authorizations, and consents required for Your particular use of the Software.
+
+The Copyright Holder is not responsible for the consequences of Your use of the Software, including consequences arising from its use in an inappropriate, unauthorized, unsafe, or unsuitable environment, to the maximum extent permitted by applicable law.
 
 ---
 
