@@ -145,19 +145,62 @@ Example structure:
 [
     {
         "id": 1,
-        "title": "Example ticket",
-        "description": "Example description",
-        "reporter": "User",
-        "priority": "Medium",
+        "title": "Login button not responding",
+        "description": "The login button does not respond when the user enters valid credentials.",
+        "reporter": "Ali",
+        "priority": "High",
         "status": "Open",
         "assignee": "Unassigned",
         "tags": [
-            "example",
+            "bug",
+            "authentication",
             "ui"
         ],
-        "notes": [],
-        "created_at": "2026-08-20T00:00:00+00:00",
-        "updated_at": "2026-08-20T00:00:00+00:00"
+        "notes": [
+            "[2026-08-19T17:16:29.243731+00:00] Issue reproduced and confirmed."
+        ],
+        "created_at": "2026-08-19T17:10:41.803087+00:00",
+        "updated_at": "2026-08-19T17:16:29.243731+00:00"
+    },
+    {
+        "id": 2,
+        "title": "Update dashboard layout",
+        "description": "Improve the dashboard layout and make the navigation easier to use.",
+        "reporter": "Sara",
+        "priority": "Medium",
+        "status": "In Progress",
+        "assignee": "Reza",
+        "tags": [
+            "ui",
+            "dashboard",
+            "improvement"
+        ],
+        "notes": [
+            "[2026-08-19T17:15:44.903745+00:00] Initial layout reviewed.",
+            "[2026-08-19T17:15:54.831331+00:00] Navigation changes are currently being implemented."
+        ],
+        "created_at": "2026-08-19T17:15:34.955220+00:00",
+        "updated_at": "2026-08-19T17:15:54.831376+00:00"
+    },
+    {
+        "id": 3,
+        "title": "Add CSV export",
+        "description": "Allow users to export ticket information to a CSV file.",
+        "reporter": "Mina",
+        "priority": "Low",
+        "status": "Closed",
+        "assignee": "Ali",
+        "tags": [
+            "feature",
+            "export",
+            "csv"
+        ],
+        "notes": [
+            "[2026-08-20T08:30:00+00:00] CSV export implemented.",
+            "[2026-08-20T09:10:00+00:00] Export functionality tested successfully."
+        ],
+        "created_at": "2026-08-20T08:00:00+00:00",
+        "updated_at": "2026-08-20T09:10:00+00:00"
     }
 ]
 ```
