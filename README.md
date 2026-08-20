@@ -40,6 +40,15 @@ Ticket data is stored locally in a JSON file named `tickets_gui.json`.
 Using the application in an environment for which it was not designed is entirely at the user's **OWN RISK AND RESPONSIBILITY**, to the maximum extent permitted by applicable law.
 
 ---
+## Screenshot
+
+## Screenshot
+
+![Ticketing System GUI](assets/screenshot.png)
+
+---
+
+---
 
 ## Features
 
