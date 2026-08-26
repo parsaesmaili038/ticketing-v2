@@ -1,0 +1,91 @@
+name: Issue Warning - 59 Days
+
+on:
+  schedule:
+    - cron: "57 0 * * *"
+
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  warning:
+    name: Send 59-Day Final Warning
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check issues
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const now = Date.now();
+            const fiftyNineDays = 59 * 24 * 60 * 60 * 1000;
+
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open",
+              per_page: 100
+            });
+
+            for (const issue of issues) {
+              if (issue.pull_request) continue;
+
+              const createdAt = new Date(issue.created_at).getTime();
+              const age = now - createdAt;
+
+              if (age < fiftyNineDays) continue;
+
+              const hasWarningLabel = issue.labels.some(
+                label => label.name === "issue-warning-59d"
+              );
+
+              if (hasWarningLabel) continue;
+
+              const message = [
+                "⏳ **Final Deadline Warning**",
+                "",
+                "Hello!",
+                "",
+                "This Issue has now been open for 59 days.",
+                "",
+                "Please be advised that this Issue is scheduled to be automatically closed and locked tomorrow, once 60 days have passed since it was opened.",
+                "",
+                "If this Issue is still relevant, please make sure that any important information, updates, or additional details have been provided before the deadline.",
+                "",
+                "After the 60-day deadline, this Issue will be automatically closed and locked regardless of its activity status.",
+                "",
+                "🙏 Thank you for your understanding, patience, and cooperation."
+              ].join("\n");
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: message
+              });
+
+              try {
+                await github.rest.issues.getLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: "issue-warning-59d"
+                });
+              } catch {
+                await github.rest.issues.createLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: "issue-warning-59d",
+                  description: "59-day final deadline warning has been issued",
+                  color: "D93F0B"
+                });
+              }
+
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                labels: ["issue-warning-59d"]
+              });
+            }
