@@ -1,0 +1,114 @@
+name: Issue Warning - 15 Days
+
+on:
+  schedule:
+    - cron: "30 0 * * *"
+
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  warning:
+    name: Send 15-Day Warning
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check issues
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const now = Date.now();
+            const fifteenDays = 15 * 24 * 60 * 60 * 1000;
+
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open",
+              per_page: 100
+            });
+
+            for (const issue of issues) {
+              if (issue.pull_request) continue;
+
+              const hasWarningLabel = issue.labels.some(
+                label => label.name === "issue-warning-15d"
+              );
+
+              if (hasWarningLabel) continue;
+
+              const { data: comments } =
+                await github.rest.issues.listComments({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  sort: "created",
+                  direction: "desc",
+                  per_page: 100
+                });
+
+              const realComments = comments.filter(comment => {
+                return comment.user?.type !== "Bot";
+              });
+
+              let lastActivity;
+
+              if (realComments.length > 0) {
+                lastActivity = new Date(
+                  realComments[0].created_at
+                ).getTime();
+              } else {
+                lastActivity = new Date(
+                  issue.created_at
+                ).getTime();
+              }
+
+              const inactivity = now - lastActivity;
+
+              if (inactivity < fifteenDays) continue;
+
+              const message = [
+                "⏳ **15-Day Reminder**",
+                "",
+                "Hello!",
+                "",
+                "This Issue has had no activity for 15 days.",
+                "",
+                "If this issue is still relevant, please provide any additional information or updates that may help us investigate it.",
+                "",
+                "If no further activity is provided, this Issue may be closed automatically according to the project's issue management policy.",
+                "",
+                "🙏 Thank you for your patience and cooperation."
+              ].join("\n");
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: message
+              });
+
+              try {
+                await github.rest.issues.getLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: "issue-warning-15d"
+                });
+              } catch {
+                await github.rest.issues.createLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: "issue-warning-15d",
+                  description: "15-day inactivity warning has been issued",
+                  color: "FBCA04"
+                });
+              }
+
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                labels: ["issue-warning-15d"]
+              });
+            }
