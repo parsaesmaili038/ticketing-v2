@@ -9,10 +9,10 @@ from tkinter import messagebox, simpledialog
 
 
 # ============================================================
-# تنظیمات کلی ظاهر برنامه
+# General appearance settings تنظیمات کلی ظاهر برنامه
 # ============================================================
-ctk.set_appearance_mode("dark")      # حالت تیره
-ctk.set_default_color_theme("blue")   # تم پیش‌فرض آبی
+ctk.set_appearance_mode("dark")      # Dark mode حالت تیره
+ctk.set_default_color_theme("blue")   # Default blue theme تم پیش‌فرض آبی
 
 
 # ============================================================
@@ -21,13 +21,16 @@ ctk.set_default_color_theme("blue")   # تم پیش‌فرض آبی
 
 def now_iso() -> str:
     """
-    زمان فعلی را به صورت ISO8601 و با timezone UTC برمی‌گرداند.
+    زمان فعلی را به صورت ISO8601 و با timezone UTC برمی‌گرداند.  Returns the current time as an ISO 8601 timestamp with the UTC timezone. 
     """
     return datetime.now(timezone.utc).isoformat()
 
 
 def parse_tags(tags_text: str) -> List[str]:
     """
+    Converts comma-separated tag text into a list of tags.
+    Example:
+    "bug, ui, urgent" -> ["bug", "ui", "urgent"]
     متن برچسب‌ها را که با کاما جدا شده‌اند، به لیست تبدیل می‌کند.
     مثال:
         "bug, ui, urgent" -> ["bug", "ui", "urgent"]
@@ -37,19 +40,19 @@ def parse_tags(tags_text: str) -> List[str]:
 
 def tags_to_text(tags: List[str]) -> str:
     """
-    لیست برچسب‌ها را به متن قابل نمایش تبدیل می‌کند.
+    لیست برچسب‌ها را به متن قابل نمایش تبدیل می‌کند. Converts a list of tags into text suitable for display.
     """
     return ", ".join(tags) if tags else "-"
 
 
 # ============================================================
-# مدل داده
+# model data مدل داده
 # ============================================================
 
 @dataclass
 class Ticket:
     """
-    نماینده‌ی یک تیکت.
+    نماینده‌ی یک تیکت. show a ticket
     """
     id: int
     title: str
@@ -65,7 +68,7 @@ class Ticket:
 
     def to_dict(self) -> dict:
         """
-        تبدیل شیء Ticket به دیکشنری برای ذخیره در JSON.
+        تبدیل شیء Ticket به دیکشنری برای ذخیره در JSON. Converts a Ticket object to a dictionary for JSON storage. 
         """
         return {
             "id": self.id,
@@ -84,7 +87,8 @@ class Ticket:
     @classmethod
     def from_dict(cls, data: dict) -> "Ticket":
         """
-        ساخت Ticket از داده‌ی دیکشنری.
+        ساخت Ticket از داده‌ی دیکشنری. 
+        Creates a Ticket object from dictionary data.
         """
         return cls(
             id=int(data.get("id", 0)),
@@ -102,12 +106,12 @@ class Ticket:
 
 
 # ============================================================
-# منطق مدیریت تیکت‌ها
+#   Ticket management logic منطق مدیریت تیکت‌ها
 # ============================================================
 
 class TicketSystem:
     """
-    مدیریت ذخیره، بارگذاری و عملیات مربوط به تیکت‌ها.
+    مدیریت ذخیره، بارگذاری و عملیات مربوط به تیکت‌ها.  Manages ticket storage, loading, and related operations.
     """
 
     def __init__(self, filename: str = "tickets_gui.json"):
@@ -118,6 +122,8 @@ class TicketSystem:
         """
         تیکت‌ها را از فایل JSON بارگذاری می‌کند.
         اگر فایل وجود نداشته باشد یا خراب باشد، لیست خالی برمی‌گرداند.
+        Loads tickets from a JSON file.
+        If the file does not exist or is corrupted, returns an empty list.
         """
         if not os.path.exists(self.filename):
             return []
@@ -132,12 +138,13 @@ class TicketSystem:
             return [Ticket.from_dict(item) for item in data]
 
         except (json.JSONDecodeError, OSError):
-            # اگر فایل خراب باشد یا باز نشود، برنامه نمی‌ترکد؛ فقط خونسرد می‌ماند.
+            # اگر فایل خراب باشد یا باز نشود، برنامه نمی‌ترکد؛ فقط خونسرد می‌ماند.  If the file is corrupted or cannot be opened, the program won't crash; it just keeps its cool.
             return []
 
     def _save(self) -> None:
         """
-        تیکت‌ها را در فایل JSON ذخیره می‌کند.
+        تیکت‌ها را در فایل JSON ذخیره می‌کند. 
+        Saves tickets to a JSON file.
         """
         try:
             with open(self.filename, "w", encoding="utf-8") as f:
@@ -153,6 +160,7 @@ class TicketSystem:
     def _next_id(self) -> int:
         """
         شناسه‌ی بعدی را تولید می‌کند.
+        Generates the next ticket ID.
         """
         if not self.tickets:
             return 1
@@ -169,6 +177,8 @@ class TicketSystem:
     ) -> Ticket:
         """
         تیکت جدید می‌سازد و ذخیره می‌کند.
+        
+        Creates and saves a new ticket.
         """
         ticket = Ticket(
             id=self._next_id(),
@@ -195,6 +205,7 @@ class TicketSystem:
     def delete_ticket(self, ticket_id: int) -> bool:
         """
         تیکت را حذف می‌کند.
+        Deletes a ticket.
         """
         before = len(self.tickets)
         self.tickets = [t for t in self.tickets if t.id != ticket_id]
@@ -249,6 +260,7 @@ class TicketSystem:
     def search_tickets(self, query: str) -> List[Ticket]:
         """
         در عنوان، توضیحات، گزارش‌دهنده، برچسب‌ها و assignee جستجو می‌کند.
+        Searches across the title, description, reporter, tags, and assignee.
         """
         query = query.strip().lower()
         if not query:
@@ -314,6 +326,7 @@ class TicketingApp(ctk.CTk):
 
     def _build_sidebar(self):
         """
+        Left panel: search, ticket list, and main buttons
         پنل سمت چپ: جستجو + لیست تیکت‌ها + دکمه‌های اصلی
         """
         self.sidebar = ctk.CTkFrame(self, corner_radius=14)
@@ -335,7 +348,7 @@ class TicketingApp(ctk.CTk):
         self.search_entry.grid(row=1, column=0, padx=16, pady=8, sticky="ew")
         self.search_entry.bind("<KeyRelease>", self._on_search)
 
-        # فریم اسکرول‌دار برای لیست تیکت‌ها
+        #  Scrollable frame for the ticket list فریم اسکرول‌دار برای لیست تیکت‌ها
         self.ticket_scroll = ctk.CTkScrollableFrame(self.sidebar, corner_radius=12)
         self.ticket_scroll.grid(row=2, column=0, padx=16, pady=8, sticky="nsew")
 
@@ -358,7 +371,7 @@ class TicketingApp(ctk.CTk):
 
     def _build_main_area(self):
         """
-        پنل میانی/اصلی: اطلاعات خلاصه‌ی تیکت انتخاب‌شده
+        Main/middle panel: summary information for the selected ticket پنل میانی/اصلی: اطلاعات خلاصه‌ی تیکت انتخاب‌شده
         """
         self.main_area = ctk.CTkFrame(self, corner_radius=14)
         self.main_area.grid(row=0, column=1, sticky="nsew", padx=(0, 12), pady=12)
@@ -412,17 +425,20 @@ class TicketingApp(ctk.CTk):
     def _build_details_panel(self):
         """
         در این نسخه، همان main_area نقش پنل جزئیات را هم دارد.
-        این متد برای خوانایی نگه داشته شده.
+        این متد برای خوانایی نگه داشته شده 
+        In this version, main_area also serves as the details panel.
+        This method is kept for readability.
         """
         pass
 
     # --------------------------------------------------------
-    # منطق نمایش
+    #  showing method نطق نمایش
     # --------------------------------------------------------
 
     def refresh_ticket_list(self, tickets: Optional[List[Ticket]] = None):
         """
-        لیست تیکت‌ها را بازسازی می‌کند.
+        لیست تیکت‌ها را بازسازی می‌کند. 
+        Rebuilds the ticket list.
         """
         for widget in self.ticket_scroll.winfo_children():
             widget.destroy()
@@ -442,7 +458,7 @@ class TicketingApp(ctk.CTk):
         for ticket in sorted(ticket_list, key=lambda t: t.id):
             self._add_ticket_item(ticket)
 
-        # اگر قبلاً تیکتی انتخاب شده بود، سعی کن دوباره نمایش بده
+        #  If a ticket was previously selected, try to display it again. اگر قبلاً تیکتی انتخاب شده بود، سعی کن دوباره نمایش بده
         if self.selected_ticket_id:
             ticket = self.system.get_ticket(self.selected_ticket_id)
             self.show_details(ticket)
@@ -753,7 +769,7 @@ Notes:
 
 
 # ============================================================
-# اجرای برنامه
+#  run app اجرای برنامه
 # ============================================================
 
 if __name__ == "__main__":
