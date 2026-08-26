@@ -1,0 +1,124 @@
+name: Issue Security Lock
+
+on:
+  schedule:
+    - cron: "27 2 * * *"
+
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  security-lock:
+    name: Re-close and Lock Issues
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check closed issues
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const now = Date.now();
+
+            // An Issue becomes eligible for automatic locking
+            // one day after its first recorded closure.
+            const oneDay = 1 * 24 * 60 * 60 * 1000;
+
+            // Retrieve currently closed Issues.
+            // Pull Requests are excluded because GitHub exposes
+            // Pull Requests through the Issues API as well.
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "closed",
+              per_page: 100
+            });
+
+            for (const issue of issues) {
+              if (issue.pull_request) continue;
+
+              // Already locked Issues require no further action.
+              if (issue.locked) continue;
+
+              // Retrieve the Issue timeline so that the original
+              // closure can be identified, even if the Issue was
+              // closed and reopened multiple times.
+              const { data: timeline } =
+                await github.rest.issues.listEventsForTimeline({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  per_page: 100
+                });
+
+              // Find all recorded closure events and sort them
+              // chronologically to identify the first closure.
+              const closeEvents = timeline
+                .filter(event => event.event === "closed")
+                .sort(
+                  (a, b) =>
+                    new Date(a.created_at) - new Date(b.created_at)
+                );
+
+              if (closeEvents.length === 0) continue;
+
+              const firstClosedAt =
+                new Date(closeEvents[0].created_at).getTime();
+
+              const elapsed = now - firstClosedAt;
+
+              // Do nothing until one full day has passed
+              // since the Issue was first closed.
+              if (elapsed < oneDay) continue;
+
+              const message = [
+                "🔒 **Issue Secured**",
+                "",
+                "Hello!",
+                "",
+                "This Issue was first closed more than one day ago.",
+                "",
+                "To help keep closed Issues from being reopened or receiving new discussion after their closure period, this Issue will now be automatically re-closed and locked.",
+                "",
+                "This action does not indicate that the reported problem has been resolved. It is part of the project's Issue management policy for previously closed Issues.",
+                "",
+                "If the problem still requires attention, please open a new Issue with the latest information and relevant details.",
+                "",
+                "🙏 Thank you for your understanding and cooperation."
+              ].join("\n");
+
+              // Explain the action before changing the Issue state.
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: message
+              });
+
+              // Reopen the Issue first so that it receives a fresh
+              // close event before being closed again.
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: "open"
+              });
+
+              // Close the Issue again so the final state is closed.
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: "closed"
+              });
+
+              // Lock the discussion so that no further comments
+              // can be added to the closed Issue.
+              await github.rest.issues.lock({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                lock_reason: "resolved"
+              });
+            }
