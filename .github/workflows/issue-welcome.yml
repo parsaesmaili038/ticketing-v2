@@ -21,14 +21,27 @@ jobs:
             const issue = context.payload.issue;
 
             const message = [
-              "👋 Hello!",
+              "👋 **Hello and welcome!**",
               "",
-              "Thank you for taking the time to report a problem or share a suggestion with us.",
+              "Thank you for reporting a problem, suggesting an improvement, or sharing feedback with us.",
               "",
-              "Your report has been received and will be reviewed as soon as possible.",
-              "If possible, please provide additional details, reproduction steps, and any relevant information in this Issue.",
+              "Your Issue has been received and is now available for review by the project's developers and maintainers.",
               "",
-              "🙏 Thank you for your patience and cooperation."
+              "📝 **Please keep this Issue open while the reported problem remains unresolved.**",
+              "",
+              "If possible, include reproduction steps, error messages, logs, screenshots, and other relevant details.",
+              "",
+              "🤖 **Please note:** This project uses automated Issue management workflows.",
+              "",
+              "If you close an Issue that you originally created, an automatic warning will be posted and a **24-hour security period** will begin.",
+              "",
+              "🔒 After 24 hours, the `Issue Security Lock` workflow may automatically close and lock the Issue. Reopening it does not cancel or reset this process.",
+              "",
+              "⚠️ **Please close your Issue only when the reported matter is resolved or no longer requires discussion.**",
+              "",
+              "Thank you for helping us keep the Issue tracker clear and manageable.",
+              "",
+              "— Issue Security Bot"
             ].join("\n");
 
             await github.rest.issues.createComment({
