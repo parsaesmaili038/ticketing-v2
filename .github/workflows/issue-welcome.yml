@@ -41,7 +41,7 @@ jobs:
               "",
               "Thank you for helping us keep the Issue tracker clear and manageable.",
               "",
-              "— Issue Security Bot"
+              "— Issue welcome Bot"
             ].join("\n");
 
             await github.rest.issues.createComment({
