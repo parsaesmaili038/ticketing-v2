@@ -83,7 +83,14 @@ You are not required to:
 
 Nothing in these Terms requires You to mention the Copyright Holder when distributing or using the Software.
 
+However, while attribution is not required, the Copyright Holder would greatly appreciate it if You voluntarily included a brief acknowledgment of the original Software or its author in the documentation, credits, source code comments, or other appropriate materials of Your project.
+
+If You use or find the Software useful, the Copyright Holder would also appreciate, but does not require, a **Star on the Software's GitHub repository** as a voluntary sign of appreciation and support.
+
+Any such acknowledgment or GitHub Star is entirely voluntary and is **not a condition of the license**, does not restrict any permission granted by these Terms, and is not required to use, modify, distribute, publish, sell, or otherwise exercise rights in the Software.
+
 Where applicable law independently requires preservation of a particular notice or attribution, such mandatory legal requirements shall prevail.
+
 
 ---
 
@@ -258,76 +265,123 @@ YOU ARE SOLELY RESPONSIBLE FOR DETERMINING WHETHER THE SOFTWARE IS SUITABLE FOR 
 
 ## 14. Security Disclaimer
 
-The Software may contain defects, vulnerabilities, implementation errors, configuration problems, security weaknesses, or other unintended behavior.
+The Software is provided **without any representation, warranty, or guarantee regarding its security, safety, reliability, integrity, or suitability for any particular purpose or environment**.
 
-The Copyright Holder makes no representation or warranty that the Software is secure, reliable, free from vulnerabilities, or suitable for security-sensitive environments.
+The Software may contain, without limitation, defects, bugs, vulnerabilities, security weaknesses, implementation errors, configuration errors, design limitations, compatibility issues, or other unintended behavior. Such issues may exist whether or not they are known, discovered, reported, or reasonably foreseeable at the time the Software is provided.
 
-You are solely responsible for evaluating, testing, securing, configuring, monitoring, and maintaining the Software before and during deployment.
+The Copyright Holder **does not warrant or guarantee** that the Software is secure, free from vulnerabilities, free from malicious or unintended behavior, resistant to unauthorized access, suitable for production use, or appropriate for any security-sensitive or high-risk environment.
 
-The Software should not be assumed to be suitable for safety-critical, mission-critical, medical, financial, governmental, industrial-control, infrastructure, or other high-risk environments unless the Copyright Holder expressly states otherwise in writing.
+You are **solely and entirely responsible** for independently evaluating, reviewing, testing, auditing, securing, configuring, deploying, monitoring, maintaining, and updating the Software before and during any use or deployment.
+
+You are also solely responsible for determining whether the Software is appropriate for Your particular hardware, operating system, network, infrastructure, application, business process, or other environment.
+
+**You assume all risks associated with the security, operation, performance, reliability, availability, and use of the Software.**
+
+The Copyright Holder shall have **no responsibility or liability** for any security vulnerability, security incident, unauthorized access, unauthorized modification, data exposure, data loss, system failure, service interruption, compatibility problem, malicious exploitation, or other consequence arising from or related to the Software, except to the extent that such liability cannot lawfully be excluded under applicable law.
+
+The Software **must not be relied upon** for safety-critical, life-critical, mission-critical, medical, financial, governmental, military, industrial-control, critical-infrastructure, security-sensitive, or other high-risk applications unless the Copyright Holder has expressly and separately agreed to such use in a written document signed by the Copyright Holder.
+
+No statement, documentation, example, demonstration, repository description, comment, issue, discussion, release, update, or other communication concerning the Software shall be interpreted as a security guarantee, safety certification, professional assurance, or promise of fitness for any particular purpose unless expressly stated in writing by the Copyright Holder.
 
 ---
 
 ## 15. Limitation of Liability
 
-TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE COPYRIGHT HOLDER SHALL NOT BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, CONSEQUENTIAL, PUNITIVE, OR OTHER DAMAGES ARISING OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THESE TERMS.
+**TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE COPYRIGHT HOLDER SHALL NOT BE LIABLE FOR ANY LOSS, DAMAGE, COST, EXPENSE, CLAIM, LIABILITY, OR OTHER CONSEQUENCE ARISING OUT OF, RESULTING FROM, OR RELATED TO THE SOFTWARE OR THESE TERMS.**
 
-THIS INCLUDES, WITHOUT LIMITATION:
+This exclusion of liability applies regardless of the nature, cause, origin, or legal theory of the claim, including, without limitation, **contract, warranty, negligence, gross negligence to the extent legally excludable, strict liability, tort, statute, misrepresentation, reliance, or any other legal theory.**
 
-* Loss of data;
-* Loss of files;
-* Loss of profits;
-* Loss of revenue;
-* Loss of business;
-* Business interruption;
-* Damage to hardware;
-* Damage to software;
-* Security incidents;
-* Vulnerabilities;
-* Errors or defects;
-* Incompatibility;
-* Loss of goodwill;
-* Reliance upon the Software;
-* Use or inability to use the Software;
-* Modification or distribution of the Software; and
-* Any other loss, damage, cost, claim, liability, or consequence related to the Software.
+To the maximum extent permitted by applicable law, the Copyright Holder shall not be liable for:
 
-THIS LIMITATION APPLIES REGARDLESS OF THE LEGAL THEORY ASSERTED, INCLUDING CONTRACT, WARRANTY, NEGLIGENCE, STRICT LIABILITY, TORT, OR ANY OTHER THEORY OF LIABILITY, EVEN IF THE COPYRIGHT HOLDER HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+* Loss, corruption, alteration, or destruction of data or files;
+* Loss of profits, revenue, income, business opportunities, or anticipated savings;
+* Business interruption or operational disruption;
+* Loss of goodwill, reputation, customers, or commercial opportunities;
+* Damage to hardware, software, systems, networks, devices, or infrastructure;
+* Security incidents, vulnerabilities, exploits, unauthorized access, or data exposure;
+* Malware, malicious code, unintended behavior, or security weaknesses;
+* Bugs, defects, errors, failures, or incorrect results;
+* Compatibility or interoperability problems;
+* Service interruptions, downtime, unavailability, or discontinuation;
+* Losses resulting from modifications, integrations, configurations, deployments, or third-party components;
+* Losses resulting from Your failure to properly test, secure, configure, monitor, maintain, or update the Software;
+* Losses resulting from Your reliance upon any functionality, documentation, example, output, or information provided with the Software;
+* Claims made by third parties arising from Your use, deployment, modification, distribution, or incorporation of the Software; or
+* Any other direct, indirect, incidental, special, exemplary, consequential, punitive, or similar loss or damage.
 
-TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, YOU ASSUME ALL RISKS AND RESPONSIBILITY ARISING FROM YOUR USE, MODIFICATION, DEPLOYMENT, OR DISTRIBUTION OF THE SOFTWARE.
+**YOU EXPRESSLY ACKNOWLEDGE AND AGREE THAT YOUR USE OF THE SOFTWARE IS ENTIRELY AT YOUR OWN RISK.**
+
+You are solely responsible for determining whether the Software is suitable for Your intended purpose and environment and for taking all precautions, safeguards, backups, security measures, testing procedures, and other measures that You consider necessary.
+
+The Copyright Holder shall not be responsible for any consequence arising from Your use, misuse, inability to use, modification, deployment, integration, distribution, or reliance upon the Software.
+
+The Copyright Holder shall not be responsible for any failure, vulnerability, defect, incompatibility, interruption, loss, damage, or other consequence caused in whole or in part by **third-party software, libraries, frameworks, runtimes, operating systems, hardware, services, networks, package managers, hosting providers, infrastructure, or other external components.**
+
+The Copyright Holder shall have **no obligation to investigate, prevent, mitigate, repair, or compensate for any loss or damage** arising from the Software unless such obligation is expressly imposed by mandatory applicable law or separately agreed to in writing by the Copyright Holder.
+
+**NO ADVICE, INFORMATION, DOCUMENTATION, SUPPORT, COMMUNICATION, OR ASSISTANCE PROVIDED BY THE COPYRIGHT HOLDER CREATES ANY WARRANTY, GUARANTEE, DUTY, OR LIABILITY UNLESS EXPRESSLY AGREED IN WRITING.**
+
+To the maximum extent permitted by law, You agree to bear all risks and costs associated with Your use, testing, deployment, modification, distribution, maintenance, and security of the Software.
+
+Nothing in these Terms shall be interpreted as excluding or limiting any liability, right, protection, or remedy that cannot legally be excluded or limited under applicable law.
 
 ---
 
 ## 16. No Obligation to Provide Support
 
-Nothing in these Terms requires the Copyright Holder to provide:
+The Copyright Holder has **no obligation whatsoever** to provide technical support, customer support, maintenance, troubleshooting, installation assistance, security assistance, documentation, training, updates, patches, bug fixes, compatibility fixes, or any other service in connection with the Software.
 
-* Technical support;
-* Customer support;
-* Maintenance;
-* Updates;
-* Security patches;
-* Bug fixes;
-* Documentation updates;
-* Compatibility updates;
-* New releases;
-* Training;
-* Installation assistance; or
-* Any other service.
+Without limiting the foregoing, the Copyright Holder is under no obligation to:
 
-Any support or service provided by the Copyright Holder is voluntary unless separately agreed in writing.
+* Respond to questions, issues, reports, or requests;
+* Investigate reported bugs or vulnerabilities;
+* Provide security patches or fixes;
+* Provide updates or upgrades;
+* Maintain compatibility with new operating systems, hardware, libraries, frameworks, or dependencies;
+* Provide installation or configuration assistance;
+* Provide documentation or technical explanations;
+* Provide emergency assistance;
+* Provide replacement versions;
+* Correct defects or errors; or
+* Continue providing any service previously provided voluntarily.
+
+Any assistance, support, update, communication, or other service voluntarily provided by the Copyright Holder shall **not create any continuing obligation, precedent, warranty, guarantee, or expectation of future support**.
+
+Unless expressly agreed otherwise in a separate written agreement, all support is provided entirely at the discretion of the Copyright Holder and may be modified, suspended, or discontinued at any time without notice.
+
+**Your decision to use the Software does not create any support relationship between You and the Copyright Holder.**
 
 ---
 
 ## 17. No Obligation to Continue Development
 
-The Copyright Holder has no obligation to continue developing, maintaining, updating, distributing, or supporting the Software.
+The Copyright Holder has **no obligation to continue developing, maintaining, updating, improving, distributing, publishing, or supporting the Software.**
 
-The Software may be discontinued, abandoned, archived, renamed, replaced, or otherwise cease to be maintained at any time.
+The Copyright Holder may, at any time and without obligation to provide notice:
 
-The availability or distribution of the Software does not create any promise, guarantee, or expectation of future development, maintenance, compatibility, updates, or support.
+* Stop development;
+* Stop maintenance;
+* Stop publishing releases;
+* Stop distributing the Software;
+* Archive the project;
+* Abandon the project;
+* Rename the project;
+* Replace the Software;
+* Remove or restrict access to repositories or distribution channels;
+* Stop providing updates or security fixes;
+* End compatibility with particular platforms or dependencies; or
+* Permanently discontinue the Software.
 
----
+The existence, publication, distribution, or availability of the Software **does not create any promise, commitment, guarantee, representation, or expectation of future development, maintenance, updates, compatibility, availability, security fixes, or support.**
+
+The Copyright Holder makes **no commitment regarding the future development or availability of the Software**, regardless of whether the Software has previously received updates, releases, maintenance, support, or other improvements.
+
+Any roadmap, planned feature, discussion, issue, comment, announcement, example, statement, estimate, or other communication regarding possible future development is **informational only** and shall not constitute a binding promise, obligation, guarantee, or commitment unless expressly incorporated into a separate written agreement signed by the Copyright Holder.
+
+You acknowledge that the Software may become outdated, incompatible, unsupported, unavailable, or otherwise unsuitable for Your purposes at any time.
+
+**You are solely responsible for maintaining Your own systems, securing Your own deployments, managing dependencies, creating backups, and obtaining alternatives if the Software is discontinued or no longer suitable for Your needs.**
+
 
 ## 18. Third-Party Components and Dependencies
 
