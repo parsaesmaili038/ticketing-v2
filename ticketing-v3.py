@@ -1,3 +1,4 @@
+# this app is under this license https://github.com/parsaesmaili038/ticketing-v2/blob/main/license.md
 import json
 import os
 from dataclasses import dataclass, field
