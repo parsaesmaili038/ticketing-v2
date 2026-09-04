@@ -1,3 +1,4 @@
+```yaml
 name: 🛡️ Anti-Spam Protection
 
 run-name: >-
@@ -8,86 +9,88 @@ on:
     inputs:
 
       # ================================================================
-      # 🎯 ISSUE SELECTION
+      # ⚙️ PANEL 1 — AUTOMATIC SPAM PROTECTION
       # ================================================================
 
       from_issue:
-        description: "🎯 [ISSUE RANGE] Start Issue number"
+        description: "🎯 [AUTO] Start Issue number"
         required: true
         type: number
 
       to_issue:
-        description: "🎯 [ISSUE RANGE] End Issue number"
+        description: "🎯 [AUTO] End Issue number"
         required: true
         type: number
 
       exclude_issues:
-        description: "🚫 [ISSUE RANGE] Exclude Issues (e.g. 123,127,140)"
+        description: "🚫 [AUTO] Exclude Issues (e.g. 123,127,140)"
         required: false
         type: string
         default: ""
 
-      # ================================================================
-      # 🕒 TIME RANGE
-      # ================================================================
-
       from:
-        description: "🕒 [TIME RANGE] Start date/time in UTC (e.g. 2026-09-04T10:00:00Z)"
-        required: true
+        description: "🕒 [AUTO] Start UTC date/time — optional, leave empty for no start limit"
+        required: false
         type: string
+        default: ""
 
       to:
-        description: "🕒 [TIME RANGE] End date/time in UTC (e.g. 2026-09-04T12:00:00Z)"
-        required: true
+        description: "🕒 [AUTO] End UTC date/time — optional, leave empty for no end limit"
+        required: false
         type: string
-
-      # ================================================================
-      # 👥 USER FILTER
-      # ================================================================
+        default: ""
 
       exclude_users:
-        description: "👥 [USER FILTER] Exclude users (e.g. the-par3a,github-actions[bot])"
+        description: "👥 [AUTO] Exclude users (e.g. github-actions[bot])"
         required: false
         type: string
         default: "github-actions[bot]"
 
       threshold:
-        description: "🚨 [SPAM DETECTION] Minimum comments from one user"
+        description: "🚨 [AUTO] Minimum comments from one user to trigger detection"
         required: true
         type: number
         default: 5
 
-      # ================================================================
-      # 💬 MESSAGE
-      # ================================================================
-
       message:
-        description: "💬 [MESSAGE] Custom warning message — leave empty for default"
+        description: "💬 [AUTO] Warning message — leave empty for default"
         required: false
         type: string
         default: ""
 
-      # ================================================================
-      # ⚙️ ACTIONS
-      # ================================================================
-
       lock_issues:
-        description: "🔒 [ACTION] Lock affected Issues"
+        description: "🔒 [AUTO] Automatically lock detected spam Issues"
         required: true
         type: boolean
         default: true
 
       send_message:
-        description: "💬 [ACTION] Post warning message before locking"
+        description: "💬 [AUTO] Post clear warning before locking"
         required: true
         type: boolean
         default: true
 
       delete_comments:
-        description: "🗑️ [ACTION] Delete detected spam comments"
+        description: "🗑️ [AUTO] Delete detected spam comments"
         required: true
         type: boolean
         default: false
+
+      # ================================================================
+      # 🔒 PANEL 2 — MANUAL ISSUE LOCK
+      # ================================================================
+
+      manual_lock:
+        description: "🔒 [MANUAL] Issue numbers to lock (e.g. 123,127,140)"
+        required: false
+        type: string
+        default: ""
+
+      manual_message:
+        description: "💬 [MANUAL] Lock message — leave empty for default"
+        required: false
+        type: string
+        default: ""
 
       # ================================================================
       # 🧪 SAFETY
@@ -109,7 +112,7 @@ jobs:
 
   anti-spam:
 
-    name: 🛡️ Detect and handle suspicious activity
+    name: 🛡️ Anti-Spam & Manual Issue Protection
 
     runs-on: ubuntu-latest
 
@@ -123,7 +126,7 @@ jobs:
         run: |
           echo ""
           echo "╔══════════════════════════════════════════════════════════╗"
-          echo "║                 🛡️ ANTI-SPAM PROTECTION                 ║"
+          echo "║              🛡️ ANTI-SPAM PROTECTION                   ║"
           echo "╠══════════════════════════════════════════════════════════╣"
           echo "║  Repository : ${{ github.repository }}"
           echo "║  Started by : ${{ github.actor }}"
@@ -142,6 +145,7 @@ jobs:
           FROM_DATE: ${{ inputs.from }}
           TO_DATE: ${{ inputs.to }}
           THRESHOLD: ${{ inputs.threshold }}
+          MANUAL_LOCK: ${{ inputs.manual_lock }}
         run: |
           echo "🔍 Validating configuration..."
           echo ""
@@ -156,29 +160,58 @@ jobs:
             exit 1
           fi
 
-          if ! python -c "from datetime import datetime; datetime.fromisoformat('${FROM_DATE//Z/+00:00}')" 2>/dev/null; then
-            echo "❌ ERROR: Invalid 'from' date/time."
-            echo "   Example: 2026-09-04T10:00:00Z"
-            exit 1
+          if [ -n "$FROM_DATE" ]; then
+            if ! python -c "from datetime import datetime; datetime.fromisoformat('${FROM_DATE//Z/+00:00}')" 2>/dev/null; then
+              echo "❌ ERROR: Invalid start date/time."
+              echo "   Example: 2026-09-04T10:00:00Z"
+              exit 1
+            fi
           fi
 
-          if ! python -c "from datetime import datetime; datetime.fromisoformat('${TO_DATE//Z/+00:00}')" 2>/dev/null; then
-            echo "❌ ERROR: Invalid 'to' date/time."
-            echo "   Example: 2026-09-04T12:00:00Z"
-            exit 1
+          if [ -n "$TO_DATE" ]; then
+            if ! python -c "from datetime import datetime; datetime.fromisoformat('${TO_DATE//Z/+00:00}')" 2>/dev/null; then
+              echo "❌ ERROR: Invalid end date/time."
+              echo "   Example: 2026-09-04T12:00:00Z"
+              exit 1
+            fi
           fi
 
           echo "✅ Configuration is valid."
-          echo "🎯 Issue range : #$FROM_ISSUE → #$TO_ISSUE"
-          echo "🕒 Time range  : $FROM_DATE → $TO_DATE"
-          echo "🚨 Threshold   : $THRESHOLD"
+          echo ""
+          echo "⚙️ AUTOMATIC PROTECTION"
+          echo "   🎯 Issue range : #$FROM_ISSUE → #$TO_ISSUE"
+
+          if [ -n "$FROM_DATE" ]; then
+            echo "   🕒 Start time  : $FROM_DATE"
+          else
+            echo "   🕒 Start time  : No limit"
+          fi
+
+          if [ -n "$TO_DATE" ]; then
+            echo "   🕒 End time    : $TO_DATE"
+          else
+            echo "   🕒 End time    : No limit"
+          fi
+
+          echo "   🚨 Threshold   : $THRESHOLD"
+
+          if [ -n "$MANUAL_LOCK" ]; then
+            echo ""
+            echo "🔒 MANUAL LOCK"
+            echo "   🎯 Issues      : $MANUAL_LOCK"
+          else
+            echo ""
+            echo "🔒 MANUAL LOCK"
+            echo "   ℹ️ No manual Issues specified."
+          fi
+
           echo ""
 
       # ================================================================
       # 🚨 MAIN PROCESSOR
       # ================================================================
 
-      - name: 🚨 Detect and handle spam
+      - name: 🚨 Detect spam & execute protection
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPOSITORY: ${{ github.repository }}
@@ -199,6 +232,9 @@ jobs:
           LOCK_ISSUES: ${{ inputs.lock_issues }}
           SEND_MESSAGE: ${{ inputs.send_message }}
           DELETE_COMMENTS: ${{ inputs.delete_comments }}
+
+          MANUAL_LOCK: ${{ inputs.manual_lock }}
+          MANUAL_MESSAGE: ${{ inputs.manual_message }}
 
           DRY_RUN: ${{ inputs.dry_run }}
 
@@ -224,8 +260,8 @@ jobs:
           FROM_ISSUE = int(os.environ["FROM_ISSUE"])
           TO_ISSUE = int(os.environ["TO_ISSUE"])
 
-          FROM_DATE = os.environ["FROM_DATE"]
-          TO_DATE = os.environ["TO_DATE"]
+          FROM_DATE = os.environ.get("FROM_DATE", "").strip()
+          TO_DATE = os.environ.get("TO_DATE", "").strip()
 
           THRESHOLD = int(os.environ["THRESHOLD"])
 
@@ -243,6 +279,57 @@ jobs:
 
           DRY_RUN = (
               os.environ["DRY_RUN"].lower() == "true"
+          )
+
+          MANUAL_LOCK = os.environ.get(
+              "MANUAL_LOCK",
+              ""
+          ).strip()
+
+          CUSTOM_MESSAGE = os.environ.get(
+              "CUSTOM_MESSAGE",
+              ""
+          ).strip()
+
+          MANUAL_MESSAGE = os.environ.get(
+              "MANUAL_MESSAGE",
+              ""
+          ).strip()
+
+
+          # ============================================================
+          # DEFAULT MESSAGES
+          # ============================================================
+
+          DEFAULT_MESSAGE = """🚨 Suspicious activity detected
+
+          This Issue has been flagged because activity matching the configured anti-spam protection rules was detected.
+
+          🔒 The Issue has been temporarily locked to prevent further activity while it is reviewed.
+
+          Please do not continue posting additional comments until the review is complete.
+
+          We apologize for any inconvenience and appreciate your understanding."""
+
+          DEFAULT_MANUAL_MESSAGE = """🔒 Issue temporarily locked
+
+          This Issue has been manually locked by a repository administrator for moderation or review.
+
+          Please do not post additional comments until the Issue has been unlocked.
+
+          Thank you for your understanding."""
+
+
+          MESSAGE = (
+              CUSTOM_MESSAGE
+              if CUSTOM_MESSAGE
+              else DEFAULT_MESSAGE
+          )
+
+          MANUAL_WARNING = (
+              MANUAL_MESSAGE
+              if MANUAL_MESSAGE
+              else DEFAULT_MANUAL_MESSAGE
           )
 
 
@@ -268,7 +355,6 @@ jobs:
                   excluded_issues.add(int(item))
 
               except ValueError:
-
                   print(
                       f"⚠️ Invalid Issue number ignored: {item}"
                   )
@@ -286,30 +372,6 @@ jobs:
               ).split(",")
               if user.strip()
           }
-
-
-          # ============================================================
-          # DEFAULT MESSAGE
-          # ============================================================
-
-          DEFAULT_MESSAGE = """🚨 Suspicious spam activity detected.
-
-          This activity has been detected as potentially being spam.
-          
-          The affected Issue has been temporarily locked while the activity is reviewed.
-          
-          We apologize for the inconvenience and appreciate your understanding."""
-          
-                    custom_message = os.environ.get(
-                        "CUSTOM_MESSAGE",
-                        ""
-                    ).strip()
-          
-                    MESSAGE = (
-                        custom_message
-                        if custom_message
-                        else DEFAULT_MESSAGE
-                    )
 
 
           # ============================================================
@@ -347,14 +409,21 @@ jobs:
               return date.astimezone(timezone.utc)
 
 
-          start = parse_date(FROM_DATE)
-          end = parse_date(TO_DATE)
+          start = (
+              parse_date(FROM_DATE)
+              if FROM_DATE
+              else None
+          )
 
+          end = (
+              parse_date(TO_DATE)
+              if TO_DATE
+              else None
+          )
 
-          if start >= end:
-
+          if start and end and start >= end:
               raise ValueError(
-                  "The 'from' date must be earlier than the 'to' date."
+                  "The start date must be earlier than the end date."
               )
 
 
@@ -366,66 +435,110 @@ jobs:
           print("╔══════════════════════════════════════════════════════════╗")
           print("║                 📋 EXECUTION CONFIG                     ║")
           print("╠══════════════════════════════════════════════════════════╣")
+
           print(
               f"║ 🎯 Issues       : #{FROM_ISSUE} → #{TO_ISSUE}"
           )
+
           print(
-              f"║ 🕒 From         : {start.isoformat()}"
+              f"║ 🕒 Start        : "
+              f"{start.isoformat() if start else 'No limit'}"
           )
+
           print(
-              f"║ 🕒 To           : {end.isoformat()}"
+              f"║ 🕒 End          : "
+              f"{end.isoformat() if end else 'No limit'}"
           )
+
           print(
               f"║ 🚨 Threshold    : {THRESHOLD}"
           )
+
           print(
               f"║ 👥 Excluded     : "
               f"{', '.join(sorted(excluded_users)) or 'None'}"
           )
+
           print(
               f"║ 🚫 Issues out   : "
               f"{', '.join('#' + str(x) for x in sorted(excluded_issues)) or 'None'}"
           )
+
           print(
-              f"║ 🔒 Lock         : "
+              f"║ 🔒 Auto Lock    : "
               f"{'ON' if LOCK_ISSUES else 'OFF'}"
           )
+
           print(
-              f"║ 💬 Message      : "
+              f"║ 💬 Auto Message : "
               f"{'ON' if SEND_MESSAGE else 'OFF'}"
           )
+
           print(
               f"║ 🗑️ Delete       : "
               f"{'ON' if DELETE_COMMENTS else 'OFF'}"
           )
+
+          print(
+              f"║ 🔒 Manual Lock  : "
+              f"{MANUAL_LOCK or 'None'}"
+          )
+
           print(
               f"║ 🧪 Dry Run      : "
               f"{'ON' if DRY_RUN else 'OFF'}"
           )
+
           print("╚══════════════════════════════════════════════════════════╝")
           print("")
 
 
           # ============================================================
-          # BUILD ISSUE RANGE
+          # BUILD AUTOMATIC ISSUE RANGE
           # ============================================================
 
-          selected_issues = []
+          selected_issues = [
+              issue_number
+              for issue_number in range(
+                  FROM_ISSUE,
+                  TO_ISSUE + 1
+              )
+              if issue_number not in excluded_issues
+          ]
 
-          for issue_number in range(
-              FROM_ISSUE,
-              TO_ISSUE + 1
-          ):
+          print(
+              f"🎯 Automatic protection will inspect "
+              f"{len(selected_issues)} Issue(s)."
+          )
 
-              if issue_number in excluded_issues:
+
+          # ============================================================
+          # BUILD MANUAL LOCK LIST
+          # ============================================================
+
+          manual_issues = set()
+
+          for item in MANUAL_LOCK.split(","):
+
+              item = item.strip()
+
+              if not item:
                   continue
 
-              selected_issues.append(issue_number)
+              try:
+                  manual_issues.add(int(item))
+
+              except ValueError:
+                  print(
+                      f"⚠️ Invalid manual Issue number ignored: {item}"
+                  )
 
 
           print(
-              f"🎯 Selected {len(selected_issues)} Issue(s)."
+              f"🔒 Manual lock queue: "
+              f"{len(manual_issues)} Issue(s)."
           )
+
           print("")
 
 
@@ -436,16 +549,24 @@ jobs:
           if DRY_RUN:
 
               print("╔══════════════════════════════════════════════════════════╗")
-              print("║                 🧪 DRY RUN MODE                         ║")
+              print("║                    🧪 DRY RUN                          ║")
               print("╠══════════════════════════════════════════════════════════╣")
               print("║ No changes will be made to the repository.              ║")
               print("╚══════════════════════════════════════════════════════════╝")
               print("")
 
+              print("⚙️ AUTOMATIC PROTECTION")
               for issue_number in selected_issues:
-
                   print(
-                      f"   🎯 Would inspect Issue #{issue_number}"
+                      f"   🔎 Would inspect Issue #{issue_number}"
+                  )
+
+              print("")
+
+              print("🔒 MANUAL LOCK")
+              for issue_number in sorted(manual_issues):
+                  print(
+                      f"   🔒 Would lock Issue #{issue_number}"
                   )
 
               print("")
@@ -457,11 +578,116 @@ jobs:
 
 
           # ============================================================
-          # FIND SUSPICIOUS ACTIVITY
+          # MANUAL LOCK PROCESSOR
+          # ============================================================
+
+          manually_locked = set()
+          manual_messages = 0
+
+          if manual_issues:
+
+              print("")
+              print("╔══════════════════════════════════════════════════════════╗")
+              print("║                 🔒 MANUAL LOCK MODE                    ║")
+              print("╚══════════════════════════════════════════════════════════╝")
+              print("")
+
+          for issue_number in sorted(manual_issues):
+
+              print(
+                  f"🔒 Processing manual lock for Issue #{issue_number}..."
+              )
+
+              issue_url = (
+                  f"https://api.github.com/repos/"
+                  f"{OWNER}/{REPO}/issues/{issue_number}"
+              )
+
+              response = session.get(issue_url)
+
+              if response.status_code == 404:
+                  print(
+                      f"   ⚠️ Issue #{issue_number} does not exist."
+                  )
+                  continue
+
+              response.raise_for_status()
+
+              issue = response.json()
+
+              if "pull_request" in issue:
+                  print(
+                      f"   ↪️ #{issue_number} is a Pull Request."
+                  )
+                  print(
+                      "   ⏭️ Skipping manual lock."
+                  )
+                  continue
+
+              if MANUAL_MESSAGE:
+
+                  comments_url = (
+                      f"https://api.github.com/repos/"
+                      f"{OWNER}/{REPO}/issues/"
+                      f"{issue_number}/comments"
+                  )
+
+                  response = session.post(
+                      comments_url,
+                      json={
+                          "body": (
+                              f"{MANUAL_WARNING}\n\n"
+                              f"---\n"
+                              f"🛡️ **Anti-Spam Protection — Manual Action**"
+                          )
+                      }
+                  )
+
+                  response.raise_for_status()
+
+                  manual_messages += 1
+
+                  print(
+                      "   💬 Manual lock message posted."
+                  )
+
+              lock_url = (
+                  f"https://api.github.com/repos/"
+                  f"{OWNER}/{REPO}/issues/"
+                  f"{issue_number}/lock"
+              )
+
+              response = session.put(
+                  lock_url,
+                  json={
+                      "lock_reason": "spam"
+                  }
+              )
+
+              if response.status_code == 204:
+
+                  manually_locked.add(issue_number)
+
+                  print(
+                      f"   🔒 Issue #{issue_number} locked successfully."
+                  )
+
+              elif response.status_code == 422:
+
+                  print(
+                      f"   ℹ️ Issue #{issue_number} is already locked."
+                  )
+
+              else:
+
+                  response.raise_for_status()
+
+
+          # ============================================================
+          # AUTOMATIC SPAM DETECTION
           # ============================================================
 
           suspicious = []
-
 
           for issue_number in selected_issues:
 
@@ -469,20 +695,12 @@ jobs:
                   f"🔎 Inspecting Issue #{issue_number}..."
               )
 
-
               issue_url = (
                   f"https://api.github.com/repos/"
-                  f"{OWNER}/{REPO}/issues/"
-                  f"{issue_number}"
+                  f"{OWNER}/{REPO}/issues/{issue_number}"
               )
 
-
               response = session.get(issue_url)
-
-
-              # --------------------------------------------------------
-              # Issue does not exist
-              # --------------------------------------------------------
 
               if response.status_code == 404:
 
@@ -492,15 +710,9 @@ jobs:
 
                   continue
 
-
               response.raise_for_status()
 
               issue = response.json()
-
-
-              # --------------------------------------------------------
-              # Pull Requests
-              # --------------------------------------------------------
 
               if "pull_request" in issue:
 
@@ -516,13 +728,11 @@ jobs:
 
 
               # --------------------------------------------------------
-              # Get comments
+              # GET COMMENTS
               # --------------------------------------------------------
 
               comments = []
-
               page = 1
-
 
               while True:
 
@@ -532,7 +742,6 @@ jobs:
                       f"{issue_number}/comments"
                   )
 
-
                   response = session.get(
                       comments_url,
                       params={
@@ -541,32 +750,26 @@ jobs:
                       }
                   )
 
-
                   response.raise_for_status()
 
                   data = response.json()
 
-
                   if not data:
                       break
 
-
                   comments.extend(data)
-
 
                   if len(data) < 100:
                       break
-
 
                   page += 1
 
 
               # --------------------------------------------------------
-              # Group comments by user
+              # GROUP COMMENTS BY USER
               # --------------------------------------------------------
 
               user_comments = defaultdict(list)
-
 
               for comment in comments:
 
@@ -574,21 +777,16 @@ jobs:
                       comment["created_at"]
                   )
 
-
-                  if created_at < start:
+                  if start and created_at < start:
                       continue
 
-
-                  if created_at > end:
+                  if end and created_at > end:
                       continue
-
 
                   username = comment["user"]["login"]
 
-
                   if username.lower() in excluded_users:
                       continue
-
 
                   user_comments[
                       username
@@ -596,110 +794,117 @@ jobs:
 
 
               # --------------------------------------------------------
-              # Detect suspicious users
+              # DETECT SUSPICIOUS USERS
               # --------------------------------------------------------
+
+              issue_suspicious_users = []
 
               for username, user_comment_list in user_comments.items():
 
                   count = len(user_comment_list)
 
-
                   if count < THRESHOLD:
                       continue
 
-
-                  suspicious.append({
-                      "issue_number": issue_number,
+                  issue_suspicious_users.append({
                       "username": username,
                       "comments": user_comment_list,
                       "count": count,
                   })
 
+              if issue_suspicious_users:
+
+                  suspicious.append({
+                      "issue_number": issue_number,
+                      "users": issue_suspicious_users,
+                  })
 
                   print(
-                      f"   🚨 Suspicious activity:"
-                      f" @{username} → {count} comments"
+                      f"   🚨 Suspicious activity detected "
+                      f"on Issue #{issue_number}."
                   )
 
-
-          # ============================================================
-          # NOTHING FOUND
-          # ============================================================
-
-          if not suspicious:
-
-              print("")
-              print("╔══════════════════════════════════════════════════════════╗")
-              print("║                    ✅ CLEAN                             ║")
-              print("╠══════════════════════════════════════════════════════════╣")
-              print("║ No suspicious spam activity was detected.              ║")
-              print("╚══════════════════════════════════════════════════════════╝")
-              print("")
-
-              exit(0)
+                  for item in issue_suspicious_users:
+                      print(
+                          f"      👤 @{item['username']} "
+                          f"→ {item['count']} comments"
+                      )
 
 
           # ============================================================
-          # SUSPICIOUS ACTIVITY FOUND
-          # ============================================================
-
-          print("")
-          print("╔══════════════════════════════════════════════════════════╗")
-          print("║              🚨 SUSPICIOUS ACTIVITY                    ║")
-          print("╚══════════════════════════════════════════════════════════╝")
-          print("")
-
-
-          for item in suspicious:
-
-              print(
-                  f"🚨 Issue #{item['issue_number']} | "
-                  f"@{item['username']} | "
-                  f"{item['count']} comments"
-              )
-
-
-          # ============================================================
-          # HANDLE SUSPICIOUS ISSUES
+          # HANDLE AUTOMATIC DETECTIONS
           # ============================================================
 
           processed_issues = set()
-
           locked_count = 0
           message_count = 0
           deleted_count = 0
 
 
-          for item in suspicious:
+          for issue_data in suspicious:
 
-              issue_number = item["issue_number"]
+              issue_number = issue_data["issue_number"]
+              users = issue_data["users"]
+
+              processed_issues.add(issue_number)
 
 
               # ========================================================
-              # SEND WARNING MESSAGE
+              # BUILD CLEAR WARNING
+              # ========================================================
+
+              user_summary = "\n".join(
+                  f"- `@{item['username']}` — "
+                  f"`{item['count']}` comments"
+                  for item in users
+              )
+
+              if start or end:
+
+                  time_description = (
+                      f"`{FROM_DATE or 'beginning'} → "
+                      f"{TO_DATE or 'now'}` UTC"
+                  )
+
+              else:
+
+                  time_description = (
+                      "`no time restriction`"
+                  )
+
+              warning = (
+                  f"{MESSAGE}\n\n"
+                  f"---\n"
+                  f"🛡️ **Anti-Spam Protection — Automated Action**\n\n"
+                  f"🚨 **Why was this Issue flagged?**\n"
+                  f"One or more users exceeded the configured "
+                  f"comment threshold.\n\n"
+                  f"👥 **Detected activity:**\n"
+                  f"{user_summary}\n\n"
+                  f"📊 **Configured threshold:** "
+                  f"`{THRESHOLD}` comments\n\n"
+                  f"🕒 **Checked time range:** "
+                  f"{time_description}\n\n"
+                  f"🔒 **Moderation action:** "
+                  f"This Issue may be temporarily locked while "
+                  f"the activity is reviewed.\n\n"
+                  f"Please avoid posting additional comments until "
+                  f"the review is complete.\n\n"
+                  f"🤖 This message was generated automatically "
+                  f"by GitHub Actions."
+              )
+
+
+              # ========================================================
+              # SEND WARNING
               # ========================================================
 
               if SEND_MESSAGE:
 
-                  warning = (
-                      f"{MESSAGE}\n\n"
-                      f"---\n"
-                      f"🛡️ **Anti-Spam Protection**\n\n"
-                      f"Detected activity: "
-                      f"`{item['count']}` comments from "
-                      f"`@{item['username']}` "
-                      f"between `{FROM_DATE}` and `{TO_DATE}`.\n\n"
-                      f"This action was performed automatically "
-                      f"by GitHub Actions."
-                  )
-
-
                   comments_url = (
                       f"https://api.github.com/repos/"
-                      f"{OWNER}/{REPO}/issues/"
-                      f"{issue_number}/comments"
+                      f"{OWNER}/{REPO}/issues/{issue_number}/comments"
                   )
-
 
                   response = session.post(
                       comments_url,
@@ -708,14 +913,12 @@ jobs:
                       }
                   )
 
-
                   response.raise_for_status()
 
                   message_count += 1
 
-
                   print(
-                      f"   💬 Warning posted to Issue #{issue_number}"
+                      f"   💬 Warning posted to Issue #{issue_number}."
                   )
 
 
@@ -731,14 +934,12 @@ jobs:
                       f"{issue_number}/lock"
                   )
 
-
                   response = session.put(
                       lock_url,
                       json={
                           "lock_reason": "spam"
                       }
                   )
-
 
                   if response.status_code == 204:
 
@@ -748,22 +949,15 @@ jobs:
                           f"   🔒 Issue #{issue_number} locked."
                       )
 
-
                   elif response.status_code == 422:
 
                       print(
                           f"   ℹ️ Issue #{issue_number} is already locked."
                       )
 
-
                   else:
 
                       response.raise_for_status()
-
-
-              processed_issues.add(
-                  issue_number
-              )
 
 
               # ========================================================
@@ -772,42 +966,39 @@ jobs:
 
               if DELETE_COMMENTS:
 
-                  for comment in item["comments"]:
+                  for user_data in users:
 
-                      comment_id = comment["id"]
+                      for comment in user_data["comments"]:
 
+                          comment_id = comment["id"]
 
-                      delete_url = (
-                          f"https://api.github.com/repos/"
-                          f"{OWNER}/{REPO}/issues/comments/"
-                          f"{comment_id}"
-                      )
-
-
-                      response = session.delete(
-                          delete_url
-                      )
-
-
-                      if response.status_code == 204:
-
-                          deleted_count += 1
-
-                          print(
-                              f"   🗑️ Deleted comment "
-                              f"{comment_id} "
-                              f"from @{item['username']}"
+                          delete_url = (
+                              f"https://api.github.com/repos/"
+                              f"{OWNER}/{REPO}/issues/comments/"
+                              f"{comment_id}"
                           )
 
+                          response = session.delete(
+                              delete_url
+                          )
 
-                      elif response.status_code == 404:
+                          if response.status_code == 204:
 
-                          continue
+                              deleted_count += 1
 
+                              print(
+                                  f"   🗑️ Deleted comment "
+                                  f"{comment_id} "
+                                  f"from @{user_data['username']}"
+                              )
 
-                      else:
+                          elif response.status_code == 404:
 
-                          response.raise_for_status()
+                              continue
+
+                          else:
+
+                              response.raise_for_status()
 
 
           # ============================================================
@@ -820,19 +1011,25 @@ jobs:
           print("║                    🏁 FINISHED                          ║")
           print("╠══════════════════════════════════════════════════════════╣")
           print(
-              f"║ 🎯 Issues selected : {len(selected_issues)}"
+              f"║ 🎯 Issues inspected  : {len(selected_issues)}"
           )
           print(
-              f"║ 🚨 Issues affected : {len(processed_issues)}"
+              f"║ 🚨 Issues affected   : {len(processed_issues)}"
           )
           print(
-              f"║ 🔒 Issues locked   : {locked_count}"
+              f"║ 🔒 Auto locked       : {locked_count}"
           )
           print(
-              f"║ 💬 Messages posted : {message_count}"
+              f"║ 🔒 Manual locked     : {len(manually_locked)}"
           )
           print(
-              f"║ 🗑️ Comments deleted: {deleted_count}"
+              f"║ 💬 Auto messages     : {message_count}"
+          )
+          print(
+              f"║ 💬 Manual messages   : {manual_messages}"
+          )
+          print(
+              f"║ 🗑️ Comments deleted  : {deleted_count}"
           )
           print("╚══════════════════════════════════════════════════════════╝")
           print("")
@@ -842,4 +1039,4 @@ jobs:
           )
 
           PY
-
+```
