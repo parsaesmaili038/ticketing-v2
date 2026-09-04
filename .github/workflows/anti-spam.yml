@@ -1,4 +1,4 @@
-```yaml
+
 name: 🛡️ Anti-Spam Protection
 
 run-name: >-
@@ -1038,5 +1038,4 @@ jobs:
               "🛡️ Anti-Spam Protection completed successfully."
           )
 
-          PY
-```
+
