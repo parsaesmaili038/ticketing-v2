@@ -294,22 +294,22 @@ jobs:
 
           DEFAULT_MESSAGE = """🚨 Suspicious spam activity detected.
 
-This activity has been detected as potentially being spam.
-
-The affected Issue has been temporarily locked while the activity is reviewed.
-
-We apologize for the inconvenience and appreciate your understanding."""
-
-          custom_message = os.environ.get(
-              "CUSTOM_MESSAGE",
-              ""
-          ).strip()
-
-          MESSAGE = (
-              custom_message
-              if custom_message
-              else DEFAULT_MESSAGE
-          )
+          This activity has been detected as potentially being spam.
+          
+          The affected Issue has been temporarily locked while the activity is reviewed.
+          
+          We apologize for the inconvenience and appreciate your understanding."""
+          
+                    custom_message = os.environ.get(
+                        "CUSTOM_MESSAGE",
+                        ""
+                    ).strip()
+          
+                    MESSAGE = (
+                        custom_message
+                        if custom_message
+                        else DEFAULT_MESSAGE
+                    )
 
 
           # ============================================================
