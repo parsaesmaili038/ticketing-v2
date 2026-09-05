@@ -1,0 +1,566 @@
+name: 🕊️ Sweet Ending
+
+run-name: >-
+  🕊️ Sweet Ending • ${{ github.repository }}
+
+on:
+  schedule:
+    # Runs every day at 09:00 UTC.
+    # The workflow checks the final date internally.
+    - cron: "0 9 * * *"
+
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "⚠️ Force finalization immediately (TESTING ONLY)"
+        required: false
+        default: false
+        type: boolean
+
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+
+jobs:
+  sweet-ending:
+
+    name: 🕊️ Finalize and Archive Repository
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # ================================================================
+      # 🎯 CONFIGURATION
+      # ================================================================
+
+      - name: 🎯 Set configuration
+        id: config
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          START_DATE="2026-09-05"
+          END_DATE="2027-03-05"
+
+          echo "start_date=$START_DATE" >> "$GITHUB_OUTPUT"
+          echo "end_date=$END_DATE" >> "$GITHUB_OUTPUT"
+
+          echo "🕰️ Start date : $START_DATE"
+          echo "🏁 End date   : $END_DATE"
+
+
+      # ================================================================
+      # 🕰️ CHECK DEADLINE
+      # ================================================================
+
+      - name: 🕰️ Check six-month deadline
+        id: deadline
+        shell: bash
+        env:
+          END_DATE: ${{ steps.config.outputs.end_date }}
+          FORCE: ${{ inputs.force }}
+        run: |
+          set -euo pipefail
+
+          TODAY="$(date -u +'%Y-%m-%d')"
+
+          echo "📅 Today    : $TODAY"
+          echo "🏁 Deadline : $END_DATE"
+
+          if [[ "$FORCE" == "true" ]]; then
+            echo ""
+            echo "⚠️ FORCE MODE ENABLED"
+            echo "⚠️ The finalization process will run immediately."
+            echo ""
+
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [[ "$TODAY" < "$END_DATE" ]]; then
+            echo "⏳ The six-month period has not ended yet."
+
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "🕊️ The final date has arrived."
+
+          echo "ready=true" >> "$GITHUB_OUTPUT"
+
+
+      # ================================================================
+      # 🚪 STOP IF NOT READY
+      # ================================================================
+
+      - name: ⏳ Wait for final date
+        if: steps.deadline.outputs.ready != 'true'
+        run: |
+          echo "Nothing to do yet."
+          echo "The repository remains active."
+
+
+      # ================================================================
+      # 📥 CHECKOUT REPOSITORY
+      # ================================================================
+
+      - name: 📥 Checkout repository
+        if: steps.deadline.outputs.ready == 'true'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.SWEET_ENDING_TOKEN }}
+
+
+      # ================================================================
+      # 🔐 AUTHENTICATE GITHUB CLI
+      # ================================================================
+
+      - name: 🔐 Authenticate GitHub CLI
+        if: steps.deadline.outputs.ready == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.SWEET_ENDING_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          gh auth status
+
+
+      # ================================================================
+      # 🛑 FINALIZATION WARNING
+      # ================================================================
+
+      - name: 🛑 Finalization warning
+        if: steps.deadline.outputs.ready == 'true'
+        run: |
+          echo "============================================================"
+          echo "🕊️ SWEET ENDING"
+          echo "============================================================"
+          echo ""
+          echo "The finalization process has started."
+          echo ""
+          echo "The workflow will:"
+          echo ""
+          echo "  1. 💬 Comment on every Issue"
+          echo "  2. 💬 Comment on every Pull Request"
+          echo "  3. 🔒 Close all open Issues"
+          echo "  4. 🔒 Close all open Pull Requests"
+          echo "  5. 🔐 Lock all Issues"
+          echo "  6. 🔐 Lock all Pull Requests"
+          echo "  7. 👋 Create the final goodbye Issue"
+          echo "  8. 📌 Pin the goodbye Issue"
+          echo "  9. 📖 Add the final note to README.md"
+          echo " 10. 💾 Commit the final README"
+          echo " 11. 📦 Archive the repository"
+          echo ""
+          echo "============================================================"
+
+
+      # ================================================================
+      # 🐛 PROCESS ISSUES
+      # ================================================================
+
+      - name: 🐛 Say goodbye to Issues
+        if: steps.deadline.outputs.ready == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.SWEET_ENDING_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "🔎 Fetching Issues..."
+
+          gh issue list \
+            --repo "$REPOSITORY" \
+            --state all \
+            --limit 1000 \
+            --json number,state,title,isPullRequest \
+            > /tmp/issues.json
+
+          TOTAL="$(
+            jq '[.[] | select(.isPullRequest == false)] | length' \
+            /tmp/issues.json
+          )"
+
+          echo "📦 Found $TOTAL actual Issues."
+
+          jq -c '.[] | select(.isPullRequest == false)' /tmp/issues.json |
+          while read -r issue; do
+
+            NUMBER="$(echo "$issue" | jq -r '.number')"
+            STATE="$(echo "$issue" | jq -r '.state')"
+            TITLE="$(echo "$issue" | jq -r '.title')"
+
+            echo ""
+            echo "────────────────────────────────────────"
+            echo "🐛 Issue #$NUMBER"
+            echo "📌 $TITLE"
+            echo "📊 State: $STATE"
+
+            gh issue comment "$NUMBER" \
+              --repo "$REPOSITORY" \
+              --body "🕊️ **A Final Goodbye**
+
+            This project has reached the end of its development journey.
+            
+            Development of this software has now ended, and this repository is entering archival status.
+            
+            Thank you for reporting issues, sharing ideas, testing the project, and being part of its journey.
+            
+            This Issue is being closed and locked as part of the project's finalization.
+            
+            Thank you for being here. ❤️
+            
+            — Sweet Ending Automation"
+
+            if [[ "$STATE" != "CLOSED" ]]; then
+              echo "🔒 Closing Issue #$NUMBER..."
+
+              gh issue close "$NUMBER" \
+                --repo "$REPOSITORY"
+            else
+              echo "ℹ️ Issue #$NUMBER is already closed."
+            fi
+
+            echo "🔐 Locking Issue #$NUMBER..."
+
+            gh api \
+              --method PUT \
+              "/repos/$REPOSITORY/issues/$NUMBER/lock" \
+              -f lock_reason="resolved"
+
+          done
+
+
+      # ================================================================
+      # 🔀 PROCESS PULL REQUESTS
+      # ================================================================
+
+      - name: 🔀 Say goodbye to Pull Requests
+        if: steps.deadline.outputs.ready == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.SWEET_ENDING_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "🔎 Fetching Pull Requests..."
+
+          gh pr list \
+            --repo "$REPOSITORY" \
+            --state all \
+            --limit 1000 \
+            --json number,state,title \
+            > /tmp/prs.json
+
+          TOTAL="$(jq 'length' /tmp/prs.json)"
+
+          echo "📦 Found $TOTAL Pull Requests."
+
+          jq -c '.[]' /tmp/prs.json |
+          while read -r pr; do
+
+            NUMBER="$(echo "$pr" | jq -r '.number')"
+            STATE="$(echo "$pr" | jq -r '.state')"
+            TITLE="$(echo "$pr" | jq -r '.title')"
+
+            echo ""
+            echo "────────────────────────────────────────"
+            echo "🔀 Pull Request #$NUMBER"
+            echo "📌 $TITLE"
+            echo "📊 State: $STATE"
+
+            gh pr comment "$NUMBER" \
+              --repo "$REPOSITORY" \
+              --body "🕊️ **A Final Goodbye**
+
+                This Pull Request has reached the end of its journey with the project.
+                
+                Development of this software has now ended, so no further Pull Requests will be reviewed or merged.
+                
+                Thank you for taking the time to contribute to this project.
+                
+                This Pull Request is being closed and locked as part of the project's finalization.
+                
+                Thank you for being part of the journey. ❤️
+                
+                — Sweet Ending Automation"
+
+            if [[ "$STATE" != "CLOSED" && "$STATE" != "MERGED" ]]; then
+
+              echo "🔒 Closing Pull Request #$NUMBER..."
+
+              gh pr close "$NUMBER" \
+                --repo "$REPOSITORY"
+
+            else
+              echo "ℹ️ Pull Request #$NUMBER is already closed or merged."
+            fi
+
+            echo "🔐 Locking Pull Request #$NUMBER..."
+
+            gh api \
+              --method PUT \
+              "/repos/$REPOSITORY/issues/$NUMBER/lock" \
+              -f lock_reason="resolved"
+
+          done
+
+
+      # ================================================================
+      # 👋 CREATE FINAL GOODBYE ISSUE
+      # ================================================================
+
+      - name: 👋 Create final goodbye Issue
+        if: steps.deadline.outputs.ready == 'true'
+        id: goodbye
+        env:
+          GH_TOKEN: ${{ secrets.SWEET_ENDING_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          END_DATE: ${{ steps.config.outputs.end_date }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          TITLE="🕊️ Goodbye — Project Development Has Ended"
+
+          BODY=$(cat <<EOF
+          # 🕊️ Goodbye
+
+          Today marks the end of this software project's development journey.
+
+          After months of development, testing, improvements, Issues, Pull Requests, and countless small moments along the way, the time has come for this project to enter archival status.
+
+          Thank you to everyone who:
+
+          - Used the software
+          - Reported Issues
+          - Shared ideas and suggestions
+          - Submitted Pull Requests
+          - Tested the project
+          - Followed or supported the project
+
+          Your contributions and support were an important part of this journey. ❤️
+
+          ## 🛑 Development Has Ended
+
+          Active development of this software officially ended on **${END_DATE}**.
+
+          This repository will be archived to preserve the project's history, source code, and documentation.
+
+          Development may be over, but what was built and everything learned along the way will remain.
+
+          ## The End?
+
+          Not exactly.
+
+          Some projects simply reach their ending so there is room for new projects to begin.
+
+          Thank you for being part of this journey.
+
+          🕊️ **Goodbye, and thank you for everything.**
+
+          — Sweet Ending
+          EOF
+          )
+
+          echo "👋 Creating final goodbye Issue..."
+
+          ISSUE_URL="$(
+            gh issue create \
+              --repo "$REPOSITORY" \
+              --title "$TITLE" \
+              --body "$BODY"
+          )"
+
+          ISSUE_NUMBER="${ISSUE_URL##*/}"
+
+          echo "issue_number=$ISSUE_NUMBER" >> "$GITHUB_OUTPUT"
+
+          echo "✅ Goodbye Issue created:"
+          echo "$ISSUE_URL"
+
+
+      # ================================================================
+      # 📌 PIN GOODBYE ISSUE
+      # ================================================================
+
+      - name: 📌 Pin goodbye Issue
+        if: steps.deadline.outputs.ready == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.SWEET_ENDING_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ steps.goodbye.outputs.issue_number }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "📌 Pinning goodbye Issue #$ISSUE_NUMBER..."
+
+          gh api \
+            --method POST \
+            "/repos/$REPOSITORY/issues/$ISSUE_NUMBER/pin"
+
+          echo "✅ Goodbye Issue pinned."
+
+
+      # ================================================================
+      # 🔒 LOCK GOODBYE ISSUE
+      # ================================================================
+
+      - name: 🔒 Lock goodbye Issue
+        if: steps.deadline.outputs.ready == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.SWEET_ENDING_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ steps.goodbye.outputs.issue_number }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          gh api \
+            --method PUT \
+            "/repos/$REPOSITORY/issues/$ISSUE_NUMBER/lock" \
+            -f lock_reason="resolved"
+
+          echo "🔐 Goodbye Issue locked."
+
+
+      # ================================================================
+      # 📖 UPDATE README
+      # ================================================================
+
+      - name: 📖 Add final note to README
+        if: steps.deadline.outputs.ready == 'true'
+        env:
+          END_DATE: ${{ steps.config.outputs.end_date }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          TEMP_README="$(mktemp)"
+
+          cat > "$TEMP_README" <<EOF
+          > [!NOTE]
+          > ## 🕊️ Development Has Ended
+          >
+          > Active development of this software ended on **${END_DATE}**.
+          >
+          > This repository is now archived and no further active development
+          > will take place here.
+          >
+          > Thank you to everyone who used the project, reported Issues,
+          > submitted Pull Requests, shared ideas, or followed its journey.
+          >
+          > **Thank you for being part of this journey. ❤️**
+          >
+          > — Sweet Ending
+          >
+
+          EOF
+
+          if [[ -f README.md ]]; then
+            cat "$TEMP_README" README.md > README.new.md
+            mv README.new.md README.md
+          else
+            echo "⚠️ README.md does not exist."
+            echo "Creating a new README.md..."
+
+            cp "$TEMP_README" README.md
+          fi
+
+          rm -f "$TEMP_README"
+
+          echo "✅ Final note added to README.md."
+
+
+      # ================================================================
+      # 💾 COMMIT FINAL README
+      # ================================================================
+
+      - name: 💾 Commit final README
+        if: steps.deadline.outputs.ready == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git config user.name "Sweet Ending"
+          git config user.email \
+            "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add README.md
+
+          if git diff --cached --quiet; then
+            echo "ℹ️ No README changes to commit."
+            exit 0
+          fi
+
+          git commit \
+            -m "🕊️ Finalize project and say goodbye"
+
+          git push
+
+          echo "✅ Final README commit pushed."
+
+
+      # ================================================================
+      # 🧾 FINAL STATUS
+      # ================================================================
+
+      - name: 🧾 Finalization summary
+        if: steps.deadline.outputs.ready == 'true'
+        run: |
+          echo "============================================================"
+          echo "🕊️ SWEET ENDING — FINALIZATION COMPLETE"
+          echo "============================================================"
+          echo ""
+          echo "✅ Issues processed"
+          echo "✅ Pull Requests processed"
+          echo "✅ Goodbye Issue created"
+          echo "✅ Goodbye Issue pinned"
+          echo "✅ Goodbye Issue locked"
+          echo "✅ README updated"
+          echo "✅ Final commit pushed"
+          echo ""
+          echo "📦 Repository is now ready for archival."
+          echo ""
+          echo "============================================================"
+
+
+      # ================================================================
+      # 📦 ARCHIVE REPOSITORY
+      # ⚠️ THIS MUST REMAIN THE LAST STEP
+      # ================================================================
+
+      - name: 📦 Archive repository
+        if: steps.deadline.outputs.ready == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.SWEET_ENDING_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          echo "============================================================"
+          echo "📦 ARCHIVING REPOSITORY"
+          echo "============================================================"
+          echo ""
+
+          gh api \
+            --method PATCH \
+            "/repos/$REPOSITORY" \
+            -f archived=true
+
+          echo ""
+          echo "🕊️ Repository archived successfully."
+          echo ""
+          echo "The development has officially ended."
+          echo ""
+          echo "🏁 Sweet Ending complete."
+          echo "============================================================"
